@@ -1,0 +1,15 @@
+{
+    "input_size": 35,
+    "n_actions": 6,
+    "hidden_size1": 256,
+    "hidden_size2": 256,
+    "dropout": 0.32067,
+    "lr": 0.005538,
+    "min_lr": 0.000042244,
+    "memory_history_size": 10000,
+    "EPS_START": 0.8,
+    "EPS_END": 0.026469,
+    "EPS_DECAY": 0.999,
+    "BATCH_SIZE": 128,
+    "GAMMA": 0.7
+}

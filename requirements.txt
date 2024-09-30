@@ -1,0 +1,9 @@
+pygame
+numpy<2
+scikit-learn
+scipy
+tqdm
+matplotlib
+torch
+wandb
+tabulate
