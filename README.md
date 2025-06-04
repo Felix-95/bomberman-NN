@@ -57,3 +57,6 @@ python main.py play --n-rounds=100 --no-gui --agents ffm_agent --train 1 --scena
 
 ## running
 python main.py play  --agents ffm_agent  --scenario loot-crate
+
+## running against others
+python main.py play  --agents ffm_agent rule_based_agent rule_based_agent rule_based_agent --scenario loot-crate    

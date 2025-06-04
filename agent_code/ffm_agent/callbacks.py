@@ -15,6 +15,12 @@ import wandb
 import time
 import copy
 
+try:
+    import visualtorch                       # safe import – handled below if absent
+    from matplotlib import pyplot as plt
+except ImportError:
+    visualtorch = None
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Constants for the game elements
@@ -36,6 +42,40 @@ ENEMY_SEARCH_RADIUS = 6
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
 AGENT_MOVES_WORD = ["UP", "DOWN", "LEFT", "RIGHT"]
 AGENT_MOVES_VEC = np.array([(0,-1),(0,1),(-1,0),(1,0)]) # up,down,left,right
+
+def _visualize_policy_net(agent, fname="mlp_network.png"):
+    """
+    Saves a black-background ANN diagram (one circle per neuron, red/blue weights)
+    using visualtorch.graph_view(…).
+    Called only once after the network is built.
+    """
+    if visualtorch is None:
+        print("visualtorch is not installed. Skipping network visualization.")
+        return
+
+    try:
+        img = visualtorch.graph_view(
+            agent.policy_net.cpu(),
+            input_shape=(1, agent.input_size),
+            background_fill="white",
+            connector_fill={True: "red", False: "blue"},  # sign-based coloring
+            node_size=20,
+            layer_spacing=7000,
+            node_spacing=60,
+            show_neurons=True,
+            opacity=255,
+            connector_width=1,
+            ellipsize_after  = 400,
+            # show_neurons = True
+        )
+        img.save(fname)
+        print(f"ANN diagram saved to {fname}")
+        if hasattr(agent, "logger"):
+            agent.logger.info(f"ANN diagram saved to {fname}")
+    except Exception as e:
+        print(f"Could not visualize policy net: {e}")
+        if hasattr(agent, "logger"):
+            agent.logger.error(f"Could not visualize policy net: {e}")
 
 def setup(self):
     """
@@ -118,6 +158,9 @@ def setup(self):
         self.optimizer, mode='min', factor=0.95,
         patience=lr_patience, min_lr=min_lr
     )
+    # to visualize the network
+    # _visualize_policy_net(self, fname="mlp-network.png")  
+            
 
 
 def act(self, game_state: dict) -> str:
@@ -186,7 +229,7 @@ def act(self, game_state: dict) -> str:
     if not self.train:
         final_action = avoid_self_destruction(features, chosen_action, game_state)
         if final_action != chosen_action:
-                self.used_action_intervention = True
+            self.used_action_intervention = True
     else:
         final_action = chosen_action
     
